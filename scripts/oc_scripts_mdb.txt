@@ -31,20 +31,21 @@ oc set volumes deploy/mongodb-server \
   --name=mongodb-storage \
   --type=persistentVolumeClaim
 
+
 -- entering to mongo DB in pod --
 oc rsh <mongo db pod id>
 mongosh -u admin -p secretpassword --authenticationDatabase admin
-use users
+use database
 show collections
 
 -- create a collection --
-db.createCollection("users")
+db.createCollection(<collection name>)
 
 -- add document --
 db.<collection name>.insert({data})
 
 
--- create server connecting to present data -- 
+-- create server to present data -- 
 oc new-app https://github.com/YosefGu/OpenShift-MongoDB-Python \
   --name=python-mongodb-app \
   -e MONGO_HOST=mongodb-server \
