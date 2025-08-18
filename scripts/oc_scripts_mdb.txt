@@ -16,13 +16,11 @@ EOF
 
 
 -- create a mongodb-server --
-oc new-app \
+oc new-app docker.io/library/mongo:7.0.23 \
     --name=mongodb-server \
-   -e MONGODB_USER=username \
-   -e MONGODB_PASSWORD=password \
-   -e MONGODB_DATABASE=database \
-   -e MONGODB_ADMIN_PASSWORD=admin_password \
-   registry.access.redhat.com/rhscl/mongodb-26-rhel7
+    -e MONGO_INITDB_ROOT_USERNAME=admin \
+    -e MONGO_INITDB_ROOT_PASSWORD=secretpassword \
+    -e MONGO_INITDB_DATABASE=database \
 
 
 -- connecting mongodb server to pvc --
@@ -35,7 +33,9 @@ oc set volumes deploy/mongodb-server \
 
 -- entering to mongo DB in pod --
 oc rsh <mongo db pod id>
-mongo -u username -p password database
+mongosh -u admin -p secretpassword --authenticationDatabase admin
+use users
+show collections
 
 -- create a collection --
 db.createCollection("users")
@@ -43,13 +43,14 @@ db.createCollection("users")
 -- add document --
 db.<collection name>.insert({data})
 
+
+-- create server connecting to present data -- 
 oc new-app https://github.com/YosefGu/OpenShift-MongoDB-Python \
-    --name=python-mongodb-app \
-    -e MONGODB_HOST=mongodb-server \
-    -e MONGODB_USER=username \
-    -e MONGODB_PASSWORD=password \
-    -e MONGODB_DATABASE=database \
-    -e MONGODB_ADMIN_PASSWORD=admin_password 
+  --name=python-mongodb-app \
+  -e MONGO_HOST=mongodb-server \
+  -e MONGO_USER=admin \
+  -e MONGO_PASSWORD=secretpassword \
+  -e MONGO_DATABASE=database
 
 
 -- create a service for mongodb python server container --
