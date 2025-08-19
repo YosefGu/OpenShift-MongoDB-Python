@@ -22,14 +22,15 @@ oc new-app docker.io/library/mongo:7.0.23 \
     -e MONGO_INITDB_ROOT_PASSWORD=secretpassword \
     -e MONGO_INITDB_DATABASE=database \
 
+-- delete existing volume --
+oc set volume deployment/mongodb-server --remove --name=mongodb-server-volume-2
 
--- connecting mongodb server to pvc --
-oc set volumes deploy/mongodb-server \
+-- connecting a PVC --
+oc set volume deployment/mongodb-server \
   --add \
-  --claim-name=mongodb-pvc \
-  --mount-path=/var/lib/mongodb \
   --name=mongodb-storage \
-  --type=persistentVolumeClaim
+  --mount-path=/data/db \
+  --claim-name=mongodb-pvc
 
 
 -- entering to mongo DB in pod --
